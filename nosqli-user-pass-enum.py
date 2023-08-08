@@ -23,7 +23,15 @@ def print_help_and_exit(parser):
     exit(0)
 
 def get_method(args):
-    return requests.get if args.method.upper() == "GET" else requests.post
+    # Updated method to handle the -m argument correctly
+    if args.m:
+        method = args.m.upper()  # Convert to uppercase to ensure valid HTTP method
+        if method not in ['GET', 'POST']:
+            print(Fore.RED + "Invalid method. Only 'GET' and 'POST' are supported.")
+            sys.exit(1)
+    else:
+        method = 'POST'  # Default to POST if -m argument is not provided
+    return method
 
 def build_payloads(characters):
     return [firstChar + char for firstChar in characters for char in characters]
@@ -101,4 +109,6 @@ def main():
         print(Fore.RED + "\n".join(final_output))
 
 if __name__ == "__main__":
-    main()
+    args = get_arguments()
+    method = get_method(args)
+    main(method)
