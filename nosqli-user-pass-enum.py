@@ -102,13 +102,13 @@ def main():
 
     valid_usernames = set()
 
+    def process_payload_wrapper(payload):
+        return process_payload(payload, characters, url, method, enum_parameter, password_parameter, other_parameters, session)
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        results = []
-        for payload in payloads:
-            results.append(executor.submit(process_payload, payload, characters, url, method, enum_parameter, password_parameter, other_parameters, session))
+        results = executor.map(process_payload_wrapper, payloads)
         
-        for future in concurrent.futures.as_completed(results):
-            userpass = future.result()
+        for userpass in results:
             if userpass and userpass not in valid_usernames:
                 print(Fore.GREEN + f"{enum_parameter} found: {userpass}")
                 valid_usernames.add(userpass)
