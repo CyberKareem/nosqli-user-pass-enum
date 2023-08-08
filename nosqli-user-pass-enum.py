@@ -78,15 +78,15 @@ def main():
         
         for future in concurrent.futures.as_completed(results):
             userpass = future.result()
-            if userpass:
+            if userpass and userpass not in valid_usernames:
                 valid_usernames.add(userpass)
 
     if valid_usernames:
-        print(f"{len(valid_usernames)} {enum_parameter}(s) found:")
+        print(f"{len(valid_usernames)} username(s) found:")
         for userpass in valid_usernames:
-            print(Fore.GREEN + f"{enum_parameter} found: {userpass}")
+            print(Fore.GREEN + f"username found: {userpass}")
     else:
-        print(Fore.RED + f"No {enum_parameter} found")
+        print(Fore.RED + f"No username found")
 
 if __name__ == "__main__":
     main()
