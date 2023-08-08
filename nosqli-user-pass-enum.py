@@ -105,19 +105,16 @@ def main():
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         results = []
         for payload in payloads:
-            results.append(executor.submit(process_payload, payload, characters, url, method, enum_parameter, password_parameter, other_parameters, session))
+            results.append(executor.submit(process_payload, payload, url, method, enum_parameter, password_parameter, other_parameters, session))
         
         for future in concurrent.futures.as_completed(results):
             userpass = future.result()
             if userpass and userpass not in valid_usernames:
+                print(Fore.GREEN + f"{enum_parameter} found: {userpass}")
                 valid_usernames.add(userpass)
 
     if not valid_usernames:
         print(Fore.RED + f"No {enum_parameter} found")
-    else:
-        print(f"\n{len(valid_usernames)} {enum_parameter}(s) found:")
-        print(Fore.RED + "\n".join(valid_usernames))
 
 if __name__ == "__main__":
     main()
-
