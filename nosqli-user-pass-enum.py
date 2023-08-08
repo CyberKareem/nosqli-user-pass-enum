@@ -78,7 +78,7 @@ def main():
         
         for future in concurrent.futures.as_completed(results):
             userpass = future.result()
-            if userpass and userpass not in valid_usernames:
+            if userpass:
                 valid_usernames.add(userpass)
 
     if valid_usernames:
