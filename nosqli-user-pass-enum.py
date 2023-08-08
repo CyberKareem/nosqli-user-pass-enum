@@ -100,7 +100,7 @@ def main():
     adapter = HTTPAdapter(max_retries=retry)
     session.mount('http://', adapter)
 
-    final_output = []
+    valid_usernames = set()
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         results = []
@@ -109,16 +109,14 @@ def main():
         
         for future in concurrent.futures.as_completed(results):
             userpass = future.result()
-            if userpass:
-                if userpass not in final_output:
-                    print(Fore.GREEN + f"{enum_parameter} found: {userpass}")
-                    final_output.append(userpass)
+            if userpass and userpass not in valid_usernames:
+                valid_usernames.add(userpass)
 
-    if not final_output:
+    if not valid_usernames:
         print(Fore.RED + f"No {enum_parameter} found")
     else:
-        print(f"\n{len(final_output)} {enum_parameter}(s) found:")
-        print(Fore.RED + "\n".join(final_output))
+        print(f"\n{len(valid_usernames)} {enum_parameter}(s) found:")
+        print(Fore.RED + "\n".join(valid_usernames))
 
 if __name__ == "__main__":
     main()
