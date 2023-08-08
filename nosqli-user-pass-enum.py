@@ -8,19 +8,19 @@ from urllib3.util import Retry
 from requests.adapters import HTTPAdapter
 
 def get_arguments():
-    parser = argparse.ArgumentParser(description="Script to enumerate a parameter using regex injection.")
-    parser.add_argument("-u", "--url", metavar="URL", required=True, help="Form submission URL. Eg: http://example.com/index.php")
-    parser.add_argument("-up", "--username-parameter", metavar="parameter", required=True, help="Parameter name of the username. Eg: username, user")
-    parser.add_argument("-pp", "--password-parameter", metavar="parameter", required=True, help="Parameter name of the password. Eg: password, pass")
-    parser.add_argument("-ep", "--enum-parameter", metavar="parameter", required=True, help="Parameter that needs to be enumerated. Eg: username, password")
-    parser.add_argument("-op", "--other-parameters", metavar="parameters", help="Other parameters with the values. Separate each parameter with a comma(,). Eg: login:Login, submit:Submit")
-    parser.add_argument("-m", "--method", metavar="Method", choices=["GET", "POST"], default="POST", help="Method of the form. Eg: GET/POST")
+    parser = argparse.ArgumentParser(description="NoSQL Injection User and Password Enumerator")
+    parser.add_argument("-u", required=True, metavar="URL", help="Form submission url. Eg: http://example.com/index.php")
+    parser.add_argument("-up", required=True, metavar="parameter", help="Parameter name of the username. Eg: username, user")
+    parser.add_argument("-pp", required=True, metavar="parameter", help="Parameter name of the password. Eg: password, pass")
+    parser.add_argument("-op", metavar="parameters", help="Other parameters with the values. Separate each parameter with a comma(,). Eg: login:Login, submit:Submit")
+    parser.add_argument("-ep", required=True, metavar="parameter", help="Parameter that need to enumerate. Eg: username, password")
+    parser.add_argument("-m", metavar="Method", help="Method of the form. Eg: GET/POST")
     return parser.parse_args()
 
 def print_help_and_exit(parser):
     print(parser.print_help(sys.stderr))
-    print(Fore.YELLOW + f"\nExample: python {sys.argv[0]} -u http://example.com/index.php -up username -pp password -ep username -op login:login,submit:submit -m POST")
-    exit(0)
+    print(Fore.YELLOW + "\nExample: python " + sys.argv[0] + " -u http://example.com/index.php -up username -pp password -ep username -op login:login,submit:submit -m POST")
+    sys.exit(1)
 
 def get_method(args):
     # Updated method to handle the -m argument correctly
