@@ -42,7 +42,7 @@ def main():
     if len(sys.argv) == 1:
         print_help_and_exit(args)
 
-    url = args.u  # Use args.u instead of args.url
+    url = args.u  # Corrected to use args.u
     username_parameter = args.up
     password_parameter = args.pp
     enum_parameter = args.ep
