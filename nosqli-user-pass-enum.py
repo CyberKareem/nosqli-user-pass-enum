@@ -36,8 +36,9 @@ def get_method(args):
 def build_payloads(characters):
     return [firstChar + char for firstChar in characters for char in characters]
 
-def main(method):
+def main():
     args = get_arguments()
+    method = get_method(args)
     if len(sys.argv) == 1:
         print_help_and_exit(args)
 
@@ -109,10 +110,4 @@ def main(method):
         print(Fore.RED + "\n".join(final_output))
 
 if __name__ == "__main__":
-    args = get_arguments()
-
-    method = None
-    if args.m:
-        method = get_method(args)
-
-    main(method)
+    main()
