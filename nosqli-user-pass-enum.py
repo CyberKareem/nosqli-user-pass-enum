@@ -42,12 +42,12 @@ def main():
     if len(sys.argv) == 1:
         print_help_and_exit(args)
 
-    url = args.url
-    username_parameter = args.username_parameter
-    password_parameter = args.password_parameter
-    enum_parameter = args.enum_parameter
-    method = get_method(args)
-    other_parameters = "," + args.other_parameters if args.other_parameters else ""
+    url = args.u  # Use args.u instead of args.url
+    username_parameter = args.up
+    password_parameter = args.pp
+    enum_parameter = args.ep
+    other_parameters = "," + args.op if args.op else ""
+
 
     # Remove special characters from the list of printable characters
     characters = ''.join(c for c in string.printable if c not in "$^&*|.+\?")
@@ -111,3 +111,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
