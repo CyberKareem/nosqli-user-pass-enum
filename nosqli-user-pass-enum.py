@@ -42,12 +42,11 @@ def main():
     if len(sys.argv) == 1:
         print_help_and_exit(args)
 
-    url = args.u  # Corrected to use args.u
+    url = args.u
     username_parameter = args.up
     password_parameter = args.pp
     enum_parameter = args.ep
     other_parameters = "," + args.op if args.op else ""
-
 
     # Remove special characters from the list of printable characters
     characters = ''.join(c for c in string.printable if c not in "$^&*|.+\?")
