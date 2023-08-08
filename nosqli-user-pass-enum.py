@@ -90,7 +90,7 @@ def main():
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         results = []
         for payload in payloads:
-            results.append(executor.submit(process_payload, payload, url, method, enum_parameter, password_parameter, other_parameters, session))
+            results.append(executor.submit(process_payload, payload, url, method, enum_parameter, password_parameter, other_parameters, session, characters))
         
         for future in concurrent.futures.as_completed(results):
             userpass = future.result()
@@ -107,4 +107,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
