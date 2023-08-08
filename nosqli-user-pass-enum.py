@@ -110,5 +110,9 @@ def main():
 
 if __name__ == "__main__":
     args = get_arguments()
-    method = get_method(args)
+
+    method = None
+    if args.m:
+        method = get_method(args)
+
     main(method)
