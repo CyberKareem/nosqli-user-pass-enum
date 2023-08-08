@@ -36,7 +36,7 @@ def get_method(args):
 def build_payloads(characters):
     return [firstChar + char for firstChar in characters for char in characters]
 
-def main():
+def main(method):
     args = get_arguments()
     if len(sys.argv) == 1:
         print_help_and_exit(args)
