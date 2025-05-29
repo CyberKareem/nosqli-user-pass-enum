@@ -24,7 +24,7 @@ def print_help_and_exit(parser):
     sys.exit(1)
 
 def get_method(args):
-    # Updated method to handle the -m argument correctly
+    # Updated method to handle the -m argument correctly.
     if args.m:
         method = args.m.upper()  # Convert to uppercase to ensure valid HTTP method
         if method not in ['GET', 'POST']:
